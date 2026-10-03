@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#131a1f">
+  <title>Digital Twin | Conveyor Industri</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="identity">
+        <div>
+          <p class="identity-name">Predictive Maintenance</p>
+          <p class="identity-detail">Digital twin · Sistem conveyor</p>
+        </div>
+      </div>
+      <div class="connection" id="connection-indicator" data-state="loading" role="status" aria-live="polite">
+        <span class="connection-light" aria-hidden="true"></span>
+        <span id="connection-text">Menghubungkan MQTT</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-heading" aria-labelledby="page-title">
+        <div>
+          <h1 id="page-title">Conveyor industri</h1>
+          <p>Pergerakan sabuk dan kondisi motor berdasarkan telemetri mesin.</p>
+        </div>
+        <div class="heading-state" id="sample-time">Belum menerima data</div>
+      </section>
+
+      <div class="dashboard">
+        <section class="machine-panel" aria-labelledby="machine-heading">
+          <div class="panel-heading">
+            <h2 id="machine-heading">Jalur conveyor</h2>
+            <span class="panel-kicker">Model 3D · Sabuk berjalan</span>
+          </div>
+          <div class="stage" id="stage">
+            <canvas id="machine-canvas" aria-label="Model 3D conveyor industri dengan sabuk berjalan, roller, rangka penyangga, dan motor penggerak"></canvas>
+            <div class="stage-controls">
+              <button class="quiet-button" id="toggle-labels" type="button" aria-pressed="true">Sembunyikan label</button>
+              <button class="quiet-button" id="reset-view" type="button">Reset tampilan</button>
+            </div>
+            <span class="component-label label-belt">Sabuk bergerak</span>
+            <span class="component-label label-roller">Roller penggerak</span>
+            <span class="component-label label-frame">Rangka penyangga</span>
+            <span class="component-label label-motor">Motor conveyor</span>
+            <span class="stage-caption">Sabuk bergerak · Seret untuk memutar · Gulir untuk zoom</span>
+          </div>
+          <div class="machine-footer">
+            <span>Sabuk bersegmen · roller · rangka baja</span>
+            <span>Sabuk bergerak sebagai simulasi visual · RPM dari MQTT</span>
+          </div>
+        </section>
+
+        <aside class="side-column" aria-label="Data kondisi mesin">
+          <section class="telemetry-panel" aria-labelledby="telemetry-heading">
+            <div class="section-topline">
+              <h2 class="section-heading" id="telemetry-heading">Kondisi mesin</h2>
+              <span class="status-badge" id="status-tag">MENUNGGU DATA</span>
+            </div>
+
+            <div class="metric-row">
+              <div>
+                <div class="metric-name">Suhu mesin</div>
+                <span class="metric-source">Telemetri suhu</span>
+              </div>
+              <div class="metric-value"><span id="val-temp">--</span> <small>°C</small></div>
+            </div>
+            <div class="metric-row">
+              <div>
+                <div class="metric-name">Getaran</div>
+                <span class="metric-source">Telemetri akselerasi</span>
+              </div>
+              <div class="metric-value"><span id="val-vib">--</span> <small>m/s²</small></div>
+            </div>
+            <div class="metric-row">
+              <div>
+                <div class="metric-name">Kecepatan poros</div>
+                <span class="metric-source">Putaran motor</span>
+              </div>
+              <div class="metric-value"><span id="val-rpm">--</span> <small>RPM</small></div>
+            </div>
+
+            <p class="state-message" id="data-message" aria-live="polite">Menunggu data telemetri pertama dari broker MQTT.</p>
+            <button class="retry-button" id="retry-connect" type="button">Sambungkan ulang</button>
+          </section>
+
+          <section class="trend-panel" aria-labelledby="trend-heading">
+            <h2 class="section-heading" id="trend-heading">Riwayat getaran</h2>
+            <p class="trend-summary" id="trend-summary">Grafik akan terisi setelah data getaran diterima.</p>
+            <svg class="trend-chart" id="trend-chart" viewBox="0 0 260 76" role="img" aria-label="Grafik riwayat getaran">
+              <line class="trend-base" x1="0" y1="70" x2="260" y2="70"></line>
+              <polyline class="trend-line" id="trend-line" points=""></polyline>
+              <text class="trend-empty" id="trend-empty" x="130" y="39" text-anchor="middle">Belum ada sampel</text>
+            </svg>
+            <div class="trend-legend"><span>Sampel terbaru</span><span id="trend-count">0 sampel</span></div>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
